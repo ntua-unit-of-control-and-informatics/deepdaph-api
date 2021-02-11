@@ -1,0 +1,114 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: deepdaph-app
+  namespace: deepdaph
+spec:
+  selector:
+    app: deepdaph-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+---
+apiVersion: v1 
+kind: Pod
+metadata:
+  name: deepdaph-app
+  namespace: deepdaph
+  labels:
+    app: deepdaph-app
+spec:
+  containers:
+  - name: deepdaph-app
+    image: nanosolveit/deepdaph
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: workdir
+      mountPath: /usr/share/nginx/html/conf
+  initContainers:
+  - name: config-data
+    image: busybox
+    command: ["sh","-c", "echo \"{\\\"deepdaphapi\\\": \\\"localhost:5000\\\",\\\"stsServer\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit\\\",\\\"redirect_url\\\" : \\\"https://deepdaph.cloud.nanosolveit.eu/dashboard\\\",\\\"client_id\\\":\\\"deepdaph-app\\\",\\\"response_type\\\" : \\\"id_token token\\\",\\\"scope\\\": \\\"openid email profile\\\",\\\"silent_redirect_url\\\" : \\\"https://deepdaph.cloud.nanosolveit.eu/assets/silent-renew.html\\\"}\" > /work-dir/conf.json" ]
+    volumeMounts:
+    - name: workdir
+      mountPath: "/work-dir"
+  dnsPolicy: Default
+  volumes:
+  - name: workdir
+    emptyDir: {}
+---
+# apiVersion: apps/v1 # for versions before 1.8.0 use apps/v1
+# kind: Deployment
+# metadata:
+#   name: deepdaph-app
+#   namespace: deepdaph
+# spec:
+#   selector:
+#     matchLabels:
+#       app: deepdaph-app
+#   replicas: 1 # tells deployment to run 2 pods matching the template
+#   template: # create pods using pod definition in this template
+#     metadata:
+#       name: deepdaph-app
+#       labels:
+#         app: deepdaph-app
+#     spec:
+#       containers:
+#       - name: deepdaph-app
+#         image: nanosolveit/deepdaph
+#         ports:
+#         - containerPort: 80
+#       initContainers:
+#       - name: config-data
+#         image: busybox
+#         command: ["sh", "-c", "echo \"{\\\"deepdaphapi\\\": \\\"localhost:5000\\\",\\\"__stsServer\\\": \\\"https://login.jaqpot.org/auth/realms/jaqpot\\\",\\\"stsServer\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit\\\",\\\"redirect_url\\\" : \\\"http://localhost:4200/dashboard\\\",\\\"client_id\\\":\\\"deepdaph-app\\\",\\\"response_type\\\" : \\\"id_token token\\\",\\\"scope\\\": \\\"openid email profile\\\",\\\"silent_redirect_url\\\" : \\\"http://localhost:4200/assets/silent-renew.html\\\"}\" > /usr/share/nginx/html/conf/conf.json"]
+# ---
+apiVersion: apps/v1 # for versions before 1.8.0 use apps/v1
+kind: Deployment
+metadata:
+  name: deepdaph-app
+  namespace: deepdaph
+spec:
+  selector:
+    matchLabels:
+      app: deepdaph-app
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      name: deepdaph-app
+      labels:
+        app: deepdaph-app
+    spec:
+      containers:
+      - name: deepdaph-app
+        image: nanosolveit/deepdaph
+        ports:
+        - containerPort: 80
+      initContainers:
+      - name: config-data
+        image: busybox
+        command: ["sh", "-c", "echo \"{\\\"deepdaphapi\\\": \\\"localhost:5000\\\",\\\"__stsServer\\\": \\\"https://login.jaqpot.org/auth/realms/jaqpot\\\",\\\"stsServer\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit\\\",\\\"redirect_url\\\" : \\\"http://localhost:4200/dashboard\\\",\\\"client_id\\\":\\\"deepdaph-app\\\",\\\"response_type\\\" : \\\"id_token token\\\",\\\"scope\\\": \\\"openid email profile\\\",\\\"silent_redirect_url\\\" : \\\"http://localhost:4200/assets/silent-renew.html\\\"}\" > /usr/share/nginx/html/assets/conf.json"]
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: deepdaph-secure
+  namespace: deepdaph
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts: 
+    - deepdaph.cloud.nanosolveit.eu
+    secretName: deepdaph-cert
+  rules:
+  - host: deepdaph.cloud.nanosolveit.eu
+    http:
+      paths:
+      - backend:
+          serviceName: deepdaph-app
+          servicePort: 80
+        path: /

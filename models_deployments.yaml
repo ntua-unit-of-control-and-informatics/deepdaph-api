@@ -1,0 +1,40 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: deepdaph-models
+  namespace: deepdaph
+spec:
+  selector:
+    app: deepdaph-models
+  ports:
+  - protocol: TCP
+    port: 8501
+    targetPort: 8501
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deepdaph-models
+  namespace: deepdaph
+spec:
+  selector:
+    matchLabels:
+      app: deepdaph-models
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      name: deepdaph-models
+      labels:
+        app: deepdaph-models
+    spec:
+      containers:
+      - name: deepdaph-models
+        image: nanosolveit/deepdaph-models
+        env:
+            - name: model_config_file
+              value: "/models/models.conf"
+            - name: MODEL_BASE_PATH
+              value: "/models"
+        ports:
+        - containerPort: 8501
+---

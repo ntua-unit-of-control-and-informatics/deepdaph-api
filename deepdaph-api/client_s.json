@@ -1,0 +1,14 @@
+{
+    "web": {
+        "issuer": "https://login.jaqpot.org/auth/realms/jaqpot",
+        "auth_uri": "https://login.jaqpot.org/auth/realms/jaqpot/protocol/openid-connect/auth",
+        "client_id": "deepdaph-api",
+        "client_secret": "24c9410f-935f-499d-aca4-1e52ae496cbf",
+        "redirect_uris": [
+            "http://localhost:5000/*"
+        ],
+        "userinfo_uri":  "https://login.jaqpot.org/auth/realms/jaqpot/protocol/openid-connect/userinfo",
+        "token_uri": "https://login.jaqpot.org/auth/realms/jaqpot/protocol/openid-connect/token",
+        "token_introspection_uri": "https://login.jaqpot.org/auth/realms/jaqpot/protocol/openid-connect/token/introspect"
+    }
+}

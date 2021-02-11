@@ -1,0 +1,10 @@
+flask
+flask-restplus
+Flask-OIDC
+Pillow
+numpy
+requests
+flask-cors
+pyquots
+pymongo
+minio

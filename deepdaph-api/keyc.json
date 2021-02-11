@@ -1,0 +1,10 @@
+{
+  "realm": "jaqpot",
+  "auth-server-url": "https://login.jaqpot.org/auth",
+  "ssl-required": "external",
+  "resource": "deepdaph-api",
+  "credentials": {
+    "secret": "a7179812-0545-4b12-8a87-d397be0e6268"
+  },
+  "confidential-port": 0
+}

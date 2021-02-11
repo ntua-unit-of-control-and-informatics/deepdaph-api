@@ -1,0 +1,13 @@
+{
+	"web": {
+		"issuer": "https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit",
+		"auth_uri": "https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/auth",
+		"client_id": "deepdaph-api",
+		"client_secret": "d03bfa6d-ec08-4b01-a430-77008f07590a",
+		"redirect_uris": ["https://deepdaph-api.cloud.nanosolveit.eu/*"],
+		"userinfo_uri": "https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/userinfo",
+		"token_uri": "https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/token",
+		"token_introspection_uri": "https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/token/introspect"
+	}
+}
+

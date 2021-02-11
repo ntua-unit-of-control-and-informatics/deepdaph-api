@@ -1,0 +1,166 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: deepdaph-api
+  namespace: deepdaph
+spec:
+  selector:
+    app: deepdaph-api
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000
+---
+    apiVersion: apps/v1 # for versions before 1.8.0 use apps/v1
+    kind: Deployment
+    metadata:
+      name: deepdaph-api
+      namespace: deepdaph
+    spec:
+      selector:
+        matchLabels:
+          app: deepdaph-api
+      replicas: 1 # tells deployment to run 2 pods matching the template
+      template: # create pods using pod definition in this template
+        metadata:
+          name: deepdaph-api
+          labels:
+            app: deepdaph-api
+        spec:
+          containers:
+          - name: deepdaph-api
+            image: nanosolveit/deepdaph-api
+            ports:
+            - containerPort: 5000
+            env:
+              - name: DAPHOBD
+                value: "http://deepdaph-models:8501/v1/models/daphobd:predict"
+              - name: HEART3
+                value: "http://deepdaph-models:8501/v1/models/heart3:predict"
+              - name: ABDOMEN5
+                value: "http://deepdaph-models:8501/v1/models/abdomen5:predict"
+              - name: ABDOMEN3
+                value: "http://deepdaph-models:8501/v1/models/abdomen3:predict"
+              - name: MONGO_URI
+                value: "mongodb://mongodb-service.dbs:27017"
+              - name: MINIO_BASE
+                value: "minio-service.dbs:9000"       
+              - name: MINIO_ACCESS_KEY
+                value: "minio"
+              - name: MINIO_SECRET_KEY
+                value: "minio@enalos"
+              - name: IMAGE_PATH
+                value: "/deepdaph-api/images/"
+            volumeMounts:
+            - name: workdir
+              mountPath: /deepdaph-api/conf
+          initContainers:
+          - name: config-data
+            image: busybox
+            command: ["sh", "-c", "echo \"{\\\"web\\\": { \\\"issuer\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit\\\", \\\"auth_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/auth\\\", \\\"client_id\\\": \\\"deepdaph-api\\\", \\\"client_secret\\\": \\\"d03bfa6d-ec08-4b01-a430-77008f07590a\\\", \\\"redirect_uris\\\": [ \\\"https://deepdaph-api.cloud.nanosolveit.eu/*\\\" ], \\\"userinfo_uri\\\":  \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/userinfo\\\", \\\"token_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/token\\\", \\\"token_introspection_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/token/introspect\\\" } }\" > /work-dir/client_s.json"]
+            volumeMounts:
+            - name: workdir
+              mountPath: "/work-dir"
+          dnsPolicy: Default
+          volumes:
+          - name: workdir
+            emptyDir: {}
+    --- 
+# apiVersion: v1 
+# kind: Pod
+# metadata:
+#   name: deepdaph-app
+#   namespace: deepdaph
+#   labels:
+#     app: deepdaph-app
+# spec:
+#   containers:
+#   - name: deepdaph-app
+#     image: nanosolveit/deepdaph
+#     ports:
+#     - containerPort: 80
+#     volumeMounts:
+#     - name: workdir
+#       mountPath: /usr/share/nginx/html/conf
+#   initContainers:
+#   - name: config-data
+#     image: busybox
+#     command: ["sh","-c", "echo \"{\\\"deepdaphapi\\\": \\\"localhost:5000\\\",\\\"stsServer\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit\\\",\\\"redirect_url\\\" : \\\"https://deepdaph.cloud.nanosolveit.eu/dashboard\\\",\\\"client_id\\\":\\\"deepdaph-app\\\",\\\"response_type\\\" : \\\"id_token token\\\",\\\"scope\\\": \\\"openid email profile\\\",\\\"silent_redirect_url\\\" : \\\"https://deepdaph.cloud.nanosolveit.eu/assets/silent-renew.html\\\"}\" > /work-dir/conf.json" ]
+#     volumeMounts:
+#     - name: workdir
+#       mountPath: "/work-dir"
+#   dnsPolicy: Default
+#   volumes:
+#   - name: workdir
+#     emptyDir: {}
+# ---
+apiVersion: apps/v1 # for versions before 1.8.0 use apps/v1
+kind: Deployment
+metadata:
+  name: deepdaph-api
+  namespace: deepdaph
+spec:
+  selector:
+    matchLabels:
+      app: deepdaph-api
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      name: deepdaph-api
+      labels:
+        app: deepdaph-api
+    spec:
+      containers:
+      - name: deepdaph-api
+        image: nanosolveit/deepdaph-api
+        ports:
+        - containerPort: 5000
+        env:
+          - name: DAPHOBD
+            value: "http://deepdaph-models:8501/v1/models/daphobd:predict"
+          - name: HEART3
+            value: "http://deepdaph-models:8501/v1/models/heart3:predict"
+          - name: ABDOMEN5
+            value: "http://deepdaph-models:8501/v1/models/abdomen5:predict"
+          - name: ABDOMEN3
+            value: "http://deepdaph-models:8501/v1/models/abdomen3:predict"
+          - name: MONGO_URI
+            value: "mongodb://mongodb-service.dbs:27017"
+          - name: MINIO_BASE
+            value: "minio-service.dbs:9000"       
+          - name: MINIO_ACCESS_KEY
+            value: "minio"
+          - name: MINIO_SECRET_KEY
+            value: "minio@enalos"
+        volumeMounts:
+        - name: workdir
+          mountPath: /deepdaph-api/conf
+      initContainers:
+      - name: config-data
+        image: busybox
+        command: ["sh", "-c", "echo \"{\\\"web\\\": { \\\"issuer\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit\\\", \\\"auth_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/auth\\\", \\\"client_id\\\": \\\"deepdaph-api\\\", \\\"client_secret\\\": \\\"d03bfa6d-ec08-4b01-a430-77008f07590a\\\", \\\"redirect_uris\\\": [ \\\"https://deepdaph-api.cloud.nanosolveit.eu/*\\\" ], \\\"userinfo_uri\\\":  \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/userinfo\\\", \\\"token_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/token\\\", \\\"token_introspection_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/token/introspect\\\" } }\" > /work_dir/client_s.json"]
+        volumeMounts:
+        - name: workdir
+          mountPath: "/work-dir"
+      dnsPolicy: Default
+      volumes:
+      - name: workdir
+        emptyDir: {}
+---
+
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: minio-service
+      namespace: dbs
+    spec:
+      type: LoadBalancer
+      ports:
+        - port: 9000
+          targetPort: 9000
+          protocol: TCP
+      selector:
+        app: minio
+
+
+"{\\\"web\\\": { \\\"issuer\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit\\\", \\\"auth_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/auth\\\", \\\"client_id\\\": \\\"deepdaph-api\\\", \\\"client_secret\\\": \\\"d03bfa6d-ec08-4b01-a430-77008f07590a\\\", \\\"redirect_uris\\\": [ \\\"https://deepdaph-api.cloud.nanosolveit.eu/*\\\" ], \\\"userinfo_uri\\\":  \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/userinfo\\\", \\\"token_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/token\\\", \\\"token_introspection_uri\\\": \\\"https://login.cloud.nanosolveit.eu/auth/realms/nanosolveit/protocol/openid-connect/token/introspect\\\" } }\"
